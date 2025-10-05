@@ -1,6 +1,8 @@
-<html>
-
+<!DOCTYPE html>
+<html lang="en">
 <head>
+    <meta charset="UTF-8">
+ 
     <title>Deploy</title>
     <style>
         body {
@@ -106,7 +108,7 @@
     <div class="code-section">
         <h2>Generated Bookmarklet</h2>
         <p><strong>Drag this to your bookmarks bar:</strong></p>
-        <p><a class="bookmarklet-btn" href="#" id="generatedBookmarklet">📌 ThumbBoy v2.0</a></p>
+        <p><a class="bookmarklet-btn" href="#" id="generatedBookmarklet">📌 ThumbBoy v2.1</a></p>
         <p style="color: #666; font-style: italic;">⬆️ This bookmarklet is auto-generated from the clean code below</p>
     </div>
     <div class="code-section">
@@ -120,20 +122,116 @@
     <script>
 
         function generateBookmarklet() {
-            let code = document.getElementById('codeArea').value;
-            // Minify the code by removing newlines and extra spaces
-            let minifiedCode = code.replace(/\s+/g, ' ').trim();
-            // Encode the code for use in a bookmarklet
-            let bookmarkletCode = 'javascript:(function(){' + minifiedCode + '})()';
-            document.getElementById('minifiedCodeArea').value = bookmarkletCode;
-            document.getElementById('generatedBookmarklet').href = bookmarkletCode;
+            try {
+                // Get the iframe element
+                const iframe = document.querySelector('iframe');
+                if (!iframe) {
+                    throw new Error('Iframe not found');
+                }
+                
+                // Access the iframe's document
+                const iframeDoc = iframe.contentDocument || iframe.contentWindow.document;
+                if (!iframeDoc) {
+                    throw new Error('Cannot access iframe content. Make sure the page is loaded.');
+                }
+                
+                // Clone the iframe document to work with
+                const docClone = iframeDoc.cloneNode(true);
+                
+                // Remove all elements with id="do_not_deploy" or class="do_not_deploy"
+                const doNotDeployElements = docClone.querySelectorAll('#do_not_deploy, .do_not_deploy, [id*="do_not_deploy"]');
+                doNotDeployElements.forEach(element => element.remove());
+                
+                // Extract CSS from <style> tags
+                const styleElements = docClone.querySelectorAll('style');
+                let css = '';
+                styleElements.forEach(style => {
+                    css += style.textContent;
+                });
+                
+                // Extract JavaScript from <script> tags
+                const scriptElements = docClone.querySelectorAll('script');
+                let js = '';
+                scriptElements.forEach(script => {
+                    if (script.textContent.trim()) {
+                        js += script.textContent;
+                    }
+                });
+                
+                // Extract HTML body content (excluding scripts and styles)
+                const bodyClone = docClone.body.cloneNode(true);
+                bodyClone.querySelectorAll('script, style').forEach(el => el.remove());
+                const htmlContent = bodyClone.innerHTML;
+                
+                // Generate the clean, combined code
+                const cleanCode = `
+// ThumbBoy Bookmarklet - Auto-generated from thumbboy.html via iframe
+(function() {
+    // Prevent multiple instances
+    if (document.getElementById('thumbboy-panel')) {
+        document.getElementById('thumbboy-panel').remove();
+    }
+    
+    // Inject CSS
+    var style = document.createElement('style');
+    style.textContent = \`${css.replace(/`/g, '\\`').replace(/\$/g, '\\$')}\`;
+    document.head.appendChild(style);
+    
+    // Inject HTML
+    var container = document.createElement('div');
+    container.innerHTML = \`${htmlContent.replace(/`/g, '\\`').replace(/\$/g, '\\$')}\`;
+    document.body.appendChild(container);
+    
+    // Execute JavaScript
+    ${js}
+})();`;
+                
+                // Display the clean code
+                document.getElementById('codeArea').value = cleanCode;
+                
+                // Minify the code
+                let minifiedCode = cleanCode
+                    .replace(/\/\*[\s\S]*?\*\//g, '') // Remove /* */ comments
+                    .replace(/\/\/.*$/gm, '') // Remove // comments
+                    .replace(/\s+/g, ' ') // Replace multiple spaces with single space
+                    .replace(/;\s*}/g, ';}') // Remove spaces before closing braces
+                    .replace(/{\s*/g, '{') // Remove spaces after opening braces
+                    .replace(/}\s*/g, '}') // Remove spaces after closing braces
+                    .replace(/,\s*/g, ',') // Remove spaces after commas
+                    .trim();
+                
+                // Create bookmarklet
+                const bookmarkletCode = 'javascript:' + encodeURIComponent(minifiedCode);
+                
+                // Update the UI
+                document.getElementById('minifiedCodeArea').value = bookmarkletCode;
+                document.getElementById('generatedBookmarklet').href = bookmarkletCode;
+                
+                // Show success message
+                alert('✅ Bookmarklet generated successfully from iframe content!');
+                
+            } catch (error) {
+                console.error('Error generating bookmarklet:', error);
+                alert('❌ Error: ' + error.message + '\n\nMake sure the iframe has loaded completely before generating.');
+            }
         }
+
+        // Wait for iframe to load, then auto-generate
+        window.addEventListener('load', function() {
+            const iframe = document.querySelector('iframe[src="thumbboy.html"]');
+            if (iframe) {
+                iframe.addEventListener('load', function() {
+                    // Small delay to ensure content is fully loaded
+                    setTimeout(generateBookmarklet, 500);
+                });
+            }
+        });
 
     </script>
 
     <!-- Load the index.html file in an iframe -->
     <h2>Loading index.html:</h2>
-    <iframe src="thumbboy.html" width="100%" height="300px"></iframe>
+    <iframe src="http://localhost/projects/thumbboy/thumbboy.html" width="100%" height="300px"></iframe>
 
     <!-- You can also pass parameters like in your working project
 
