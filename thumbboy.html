@@ -249,10 +249,14 @@
                 });
 
                 var jsonOutput = {
-                    "timestamp": new Date().toISOString(),
-                    "source_url": window.location.href,
-                    "total_images": count,
-                    "image_urls": urls
+                    "images": urls,
+                    "metadata": {
+                        "source": window.location.href,
+                        "title": document.title,
+                        "domain": window.location.hostname,
+                        "timestamp": new Date().toISOString(),
+                        "total": count
+                    }
                 };
 
                 var summary = 'Found ' + count + ' images. JSON data:\n\n' + JSON.stringify(jsonOutput, null, 2);
