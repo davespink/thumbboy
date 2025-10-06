@@ -206,6 +206,8 @@
                     .replace(/}\s*/g, '}') // Remove spaces after closing braces
                     .replace(/,\s*/g, ',') // Remove spaces after commas
                     .trim();
+
+                    console.log('Minified Code:', minifiedCode.length);
                 
                 // Create bookmarklet
                 const bookmarkletCode = 'javascript:' + encodeURIComponent(minifiedCode);

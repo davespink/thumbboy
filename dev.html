@@ -265,7 +265,27 @@
                             window.thumbboyJsonData = jsonOutput;
                         }
 
-                        document.getElementById('thumbboy-debug').textContent = summary;
+// update clipboard  
+
+                
+                         document.getElementById('thumbboy-debug').textContent = summary;
+                        
+                        // Auto-copy JSON to clipboard when images are found
+                        if (count > 0) {
+                            var jsonString = JSON.stringify(jsonOutput, null, 2);
+                            
+                            if (navigator.clipboard && navigator.clipboard.writeText) {
+                                navigator.clipboard.writeText(jsonString).then(function () {
+                                    document.getElementById('thumbboy-debug').textContent = summary + '\n\n✅ JSON auto-copied to clipboard!';
+                                }).catch(function () {
+                                    // Fallback silently - don't disrupt user experience
+                                    console.log('Auto-copy failed, user can still use Copy JSON button');
+                                });
+                            } else {
+                                // Fallback for older browsers - don't auto-copy
+                                console.log('Auto-copy not supported, user can use Copy JSON button');
+                            }
+                        }
                     }
                 }
 
@@ -427,12 +447,35 @@
 
                 window.thumbboyJsonData = jsonOutput;
                 document.getElementById('thumbboy-debug').textContent = summary;
+           
+                // update clipboard  
+
+
+                // Auto-copy JSON to clipboard when images are present
+                if (count > 0) {
+                    var jsonString = JSON.stringify(jsonOutput, null, 2);
+                    
+                    if (navigator.clipboard && navigator.clipboard.writeText) {
+                        navigator.clipboard.writeText(jsonString).then(function () {
+                            document.getElementById('thumbboy-debug').textContent = summary + '\n\n✅ JSON auto-copied to clipboard!';
+                        }).catch(function () {
+                            // Fallback silently - don't disrupt user experience
+                            console.log('Auto-copy failed, user can still use Copy JSON button');
+                        });
+                    } else {
+                        // Fallback for older browsers - don't auto-copy
+                        console.log('Auto-copy not supported, user can use Copy JSON button');
+                    }
+                }
             }
 
             // Copy button functionality
             document.getElementById('thumbboy-copy').addEventListener('click', function () {
                 if (window.thumbboyJsonData) {
                     var jsonString = JSON.stringify(window.thumbboyJsonData, null, 2);
+
+// update clipboard  
+
 
                     if (navigator.clipboard && navigator.clipboard.writeText) {
                         navigator.clipboard.writeText(jsonString).then(function () {
