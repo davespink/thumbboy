@@ -12,10 +12,9 @@
 
 </head>
 
-<script src="../lib/utils.js"></script>
-
-<script src="../lib/widget.js"></script>
-<script src="../lib/wiki.js"></script>
+<script src="lib/utils.js"></script>
+<script src="lib/drag.js"></script>
+<script src="lib/widget.js"></script>
 
 <style>
     html,
@@ -23,6 +22,7 @@
     * {
         margin: 0;
         padding: 0;
+        background-color: lightskyblue;
     }
 
     #controlpanel_content {
@@ -30,6 +30,20 @@
         grid-template-columns: repeat(3, 100px);
         gap: 4px;
         padding: 1px;
+    }
+
+    .controlpanel {
+        position: absolute;
+        top: 50px;
+        left: 50px;
+        width: 370px;
+        height: 600px;
+        overflow: auto;
+        border: solid black 2px;
+        border-radius: 8px;
+        text-align: center;
+        padding: 10px;
+        background-color: bisque;
     }
 
     img {
@@ -49,13 +63,18 @@
 
 
 <body>
+    <div id="image_template" class="widget user image" style="position: absolute; left: 100px; top: 100px; 
+         z-index: 10001;padding:0px;display:none;resize:both" title="1"><img src=""></div>
+    <div id="image_drop_template" class="widget user image" style="position: absolute; left: 100px; top: 100px; 
+         z-index: 10001;padding:0px;display:none" title="1"></div>
 
-    <div id="panel" style="text-align: center;padding:10px;">
-
+    <div id="panel" class="controlpanel" style="text-align: center;padding:10px;">
+        <div id="header" style="background:lightgrey; cursor: move; padding:5px; font-weight:bold; ">
+            ThumbBoy v2.3 - Drag to Move
+        </div>
         <h3 style="margin: 0 auto; ">
             Images from Thumbboy Snagger
         </h3><br>
-
 
         <div>
             <input type="radio" name="mode" id="fixed" value="fixed" checked>
@@ -90,12 +109,75 @@
             }
 
 
+            const useSrc = true;
+            //
+            // User clicked on an image
+            //  
+            async function createImageWidget(imgsrc, isFixed) {
+                let imgURL;
+
+                if (!useSrc) {
+                    // Bypass conversion for testing
+                    imgURL = imgsrc;
+
+                    // Check if imgsrc is already a base64 data URL
+                    if (imgsrc.startsWith('data:')) {
+                        // It's already a base64 data URL - use it directly
+                        imgURL = imgsrc;
+                    } else {
+                        // It's an HTTP URL - convert to base64 using your relay
+                        try {
+                            imgURL = await urlToBase64(imgsrc);
+                        } catch (error) {
+                            console.error('Failed to convert image to base64:', error);
+                            // Fallback to original URL
+                            imgURL = imgsrc;
+                        }
+                    }
+                } else {
+                    imgURL = imgsrc;
+                }
+
+                let w = document.getElementById("image_template");
+                let newWidget = widget.clone(w);
+                vid(newWidget);
+
+                newWidget.style.left = "100px";
+                newWidget.style.top = "100px";
+                newWidget.style.zIndex = 10001;
+                newWidget.classList.add('resizeable-div');
+
+                let img = newWidget.querySelector('img');
+                if (!img) {
+                    img = document.createElement('img');
+                    newWidget.appendChild(img);
+                }
+
+                img.src = imgURL; // Set to the processed image URL (base64 or fallback)
+                img.style.width = '100%';
+                img.style.height = '100%';
+
+                if (isFixed) {
+                    img.style.objectFit = 'contain'; // Keeps aspect ratio, fits inside container
+                } else {
+                    img.style.objectFit = 'fill'; // Fills container, may distort
+                }
+
+                // Set the widget size explicitly
+                newWidget.style.width = '200px';
+                newWidget.style.height = '200px';
+
+                newWidget.style.resize = "both";
+
+                dragElement(newWidget);
+
+            }
+
+
             function pasteThumbboy(event) {
                 event.preventDefault();
-
                 const clipboardData = event.clipboardData || window.clipboardData;
                 const pastedText = clipboardData.getData('text/plain');
-
                 if (!pastedText) {
                     alert('No text data found in clipboard');
                     return;
@@ -104,10 +186,7 @@
                 try {
                     // Parse the JSON data
                     const data = JSON.parse(pastedText);
-
                     // Validate the data structure
-                    //  const a = data.images;
-                    // const b = Array.isArray(data.images);
 
 
                     if (!data.images || !Array.isArray(data.images)) {
@@ -117,7 +196,6 @@
 
                     // Clear existing images
                     doClear();
-
 
 
                     // Process the image URLs
@@ -147,15 +225,47 @@
                 img.style.height = '100px';
 
                 img.onclick = function () {
-                    imageClicked(img);
+                    createImageWidget(url, isFixed);
                 };
                 gid('controlpanel_content').appendChild(img);
             }
 
 
             function imageClicked(img) {
-                window.top.createImageWidget(img.src, gid('fixed').checked);
+                createImageWidget(img.src, gid('fixed').checked);
             }
+
+
+            function dragPanel(el, header) {
+                var x1 = 0, x2 = 0, y1 = 0, y2 = 0;
+                header.onmousedown = function (e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    y1 = e.clientX;
+                    y2 = e.clientY;
+                    document.onmousemove = function (e) {
+                        e.preventDefault();
+                        x1 = y1 - e.clientX;
+                        x2 = y2 - e.clientY;
+                        y1 = e.clientX;
+                        y2 = e.clientY;
+                        el.style.top = (el.offsetTop - x2) + 'px';
+                        el.style.left = (el.offsetLeft - x1) + 'px';
+                    };
+                    document.onmouseup = function () {
+                        document.onmousemove = null;
+                        document.onmouseup = null;
+                    };
+                };
+                el.onmousedown = function (e) {
+                    e.stopPropagation();
+                };
+            }
+            dragPanel(gid('panel'), gid('header'));
+           
+    
+
+
 
 
         </script>
