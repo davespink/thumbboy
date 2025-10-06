@@ -53,6 +53,36 @@
         border: 1px solid #ccc;
     }
 
+    /* Resizable image widgets */
+    .resizeable-div {
+        resize: both;
+        overflow: hidden; /* Changed from auto to hidden */
+        border: 2px solid #333;
+        background: white;
+        min-width: 50px;
+        min-height: 50px;
+        position: relative; /* Ensure proper positioning context */
+    }
+
+    /* Images inside resizable widgets should fill completely */
+    .resizeable-div img {
+        width: 100% !important;
+        height: 100% !important;
+        display: block;
+        max-width: none !important; /* Override the global img max-width */
+        max-height: none !important; /* Override the global img max-height */
+    }
+
+    /* Image widgets in control panel */
+    #controlpanel_content img {
+        cursor: pointer;
+        transition: transform 0.2s;
+    }
+
+    #controlpanel_content img:hover {
+        transform: scale(1.05);
+    }
+
     input[type="text"] {
         width: 200px;
         padding: 4px;
