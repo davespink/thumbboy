@@ -89,6 +89,40 @@
         margin: 4px 0;
         box-sizing: border-box;
     }
+
+    /* Gallery CSS */
+    .gallery-cell {
+        border: 1px dashed #ccc;
+        background: #f9f9f9;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        position: relative;
+        min-height: 40px;
+        transition: background-color 0.2s;
+    }
+
+    .gallery-cell:hover {
+        background: #e9e9e9;
+    }
+
+    .gallery-cell.drag-over {
+        background: #d4edda;
+        border-color: #28a745;
+    }
+
+    .gallery-cell img {
+        max-width: 100%;
+        max-height: 100%;
+        object-fit: contain;
+    }
+
+    .gallery-cell.empty::after {
+        content: 'Drop here';
+        color: #999;
+        font-size: 12px;
+        text-align: center;
+    }
 </style>
 
 
@@ -97,6 +131,17 @@
          z-index: 10001;padding:0px;display:none;resize:both" title="1"><img src=""></div>
     <div id="image_drop_template" class="widget user image" style="position: absolute; left: 100px; top: 100px; 
          z-index: 10001;padding:0px;display:none" title="1"></div>
+    
+    <!-- Gallery Template -->
+    <div id="gallery_template" class="widget user gallery" style="position: absolute; left: 100px; top: 100px; 
+         z-index: 10001; display:none; resize:both; min-width: 200px; min-height: 150px; border: 2px solid #666; background: white;" title="gallery">
+        <div class="gallery-header" style="background: #ddd; cursor: move; padding: 5px; font-weight: bold; text-align: center;">
+            Gallery - Drag to Move
+        </div>
+        <div class="gallery-grid" style="display: grid; height: calc(100% - 30px); gap: 2px; padding: 5px;">
+            <!-- Grid cells will be dynamically generated -->
+        </div>
+    </div>
 
     <div id="panel" class="controlpanel" style="text-align: center;padding:10px;">
         <div id="header" style="background:lightgrey; cursor: move; padding:5px; font-weight:bold; ">
@@ -112,6 +157,14 @@
             <input type="radio" name="mode" id="free" value="free">
             <label for="free">Free resize</label><br><br>
             <button onclick="doClear()">Clear</button>
+        </div>
+
+        <!-- Gallery Controls -->
+        <div style="margin: 10px 0; padding: 10px; border: 1px solid #ccc; border-radius: 5px; background: #f5f5f5;">
+            <strong>Create Gallery:</strong><br>
+            Rows: <input type="number" id="gallery_rows" value="2" min="1" max="10" style="width: 50px;">
+            Cols: <input type="number" id="gallery_cols" value="3" min="1" max="10" style="width: 50px;">
+            <button onclick="createGallery()">Add Gallery</button>
         </div>
 
 
@@ -292,6 +345,72 @@
                 };
             }
             dragPanel(gid('panel'), gid('header'));
+
+            // Gallery Functions
+            function createGallery() {
+                const rows = parseInt(gid('gallery_rows').value) || 2;
+                const cols = parseInt(gid('gallery_cols').value) || 3;
+                
+                const template = gid("gallery_template");
+                const newGallery = widget.clone(template);
+                vid(newGallery);
+
+                // Position the gallery
+                newGallery.style.left = "200px";
+                newGallery.style.top = "200px";
+                newGallery.style.width = (cols * 100 + 20) + "px";
+                newGallery.style.height = (rows * 80 + 50) + "px";
+                newGallery.style.zIndex = 10001;
+
+                // Set up the grid
+                const grid = newGallery.querySelector('.gallery-grid');
+                grid.style.gridTemplateColumns = `repeat(${cols}, 1fr)`;
+                grid.style.gridTemplateRows = `repeat(${rows}, 1fr)`;
+
+                // Create grid cells
+                grid.innerHTML = '';
+                for (let i = 0; i < rows * cols; i++) {
+                    const cell = document.createElement('div');
+                    cell.className = 'gallery-cell empty';
+                    cell.dataset.cellIndex = i;
+                    
+                    // Setup drop zone for each cell
+                    cell.addEventListener('dragover', function(e) {
+                        e.preventDefault();
+                        cell.classList.add('drag-over');
+                    });
+
+                    cell.addEventListener('dragleave', function(e) {
+                        cell.classList.remove('drag-over');
+                    });
+
+                    cell.addEventListener('drop', function(e) {
+                        e.preventDefault();
+                        cell.classList.remove('drag-over');
+                        
+                        // Get the dragged image source
+                        const draggedImg = document.querySelector('.dragging');
+                        if (draggedImg) {
+                            // Clear cell and add the image
+                            cell.innerHTML = '';
+                            cell.classList.remove('empty');
+                            
+                            const img = document.createElement('img');
+                            img.src = draggedImg.src;
+                            cell.appendChild(img);
+                        }
+                    });
+                    
+                    grid.appendChild(cell);
+                }
+
+                // Make gallery draggable by header
+                const header = newGallery.querySelector('.gallery-header');
+                header.id = newGallery.id + "header";
+                dragElement(newGallery);
+
+                return newGallery;
+            }
            
     
 
