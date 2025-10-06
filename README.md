@@ -7,3 +7,19 @@ The eventual short term aim is to develop a bookmarklet that can snag images fro
 The major drawback has been the workflow and how that has confused me and the chatbot both. So first mission is a sound workflow. The app works really well, it's the deployment that is at issue.
 
 
+{
+  "images": [
+    "http://localhost/projects/thumbboy/images/test1.jpg",
+    "http://localhost/projects/thumbboy/images/test1.jpg",
+    "http://localhost/projects/thumbboy/images/test2.jpg",
+    "http://localhost/projects/thumbboy/images/test2.jpg"
+  ],
+  "metadata": {
+    "source": "http://localhost/projects/thumbboy/dev.html",
+    "title": "ThumbBoy - Image URL Grabber v2.2",
+    "domain": "localhost",
+    "timestamp": "2025-10-06T16:54:19.389Z",
+    "total": 4
+  }
+}
+

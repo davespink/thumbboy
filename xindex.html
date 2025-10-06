@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Thumbboy</title>
+</head>
+
+  <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+
+        iframe {
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            margin: 10px 0;
+        }
+
+        .info {
+            background: #f5f5f5;
+            padding: 10px;
+            border-radius: 5px;
+            margin: 10px 0;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .bookmarklet-btn {
+            display: inline-block;
+            padding: 15px 30px;
+            background-color: #4CAF50;
+            color: white;
+            text-decoration: none;
+            border-radius: 8px;
+            cursor: move;
+            font-size: 18px;
+            font-weight: bold;
+            margin: 20px 0;
+            transition: background-color 0.3s;
+        }
+
+        .bookmarklet-btn:hover {
+            background-color: #45a049;
+        }
+
+        textarea {
+            width: 100%;
+            height: 200px;
+            font-family: monospace;
+            font-size: 12px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            padding: 10px;
+            margin: 10px 0;
+        }
+
+        .code-section {
+            background-color: #f9f9f9;
+            padding: 20px;
+            border-radius: 5px;
+            margin: 20px 0;
+        }
+
+        button {
+            background-color: #2196F3;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 5px;
+        }
+
+        button:hover {
+            background-color: #1976D2;
+        }
+
+        h1 {
+            color: #333;
+            text-align: center;
+        }
+
+        h2 {
+            color: #4CAF50;
+        }
+    </style>
+<body>
+    <header>
+        <h1>Welcome to Thumbboy</h1>
+    </header>
+    <main>
+        <p>This is the main content area.</p>
+   <div class="code-section">
+        <h2>Generated Bookmarklet</h2>
+        <p><strong>Drag this to your bookmarks bar:</strong></p>
+        <p><a class="bookmarklet-btn" 
+            
+            href="javascript:(function()%20%7Bif%20(document.getElementById('thumbboy-panel'))%20%7Bdocument.getElementById('thumbboy-panel').remove()%3B%7Dvar%20style%20%3D%20document.createElement('style')%3B%20style.textContent%20%3D%20%60%20body%20%7Bfont-family%3A%20Arial%2Csans-serif%3B%7D%23thumbboy-panel%20%7Bposition%3A%20absolute%3B%20top%3A%200%3B%20left%3A%200%3B%20z-index%3A%209999%3B%20background-color%3A%20%23f1f1f1%3B%20text-align%3A%20center%3B%20border%3A%201px%20solid%20%23d3d3d3%3B%20width%3A%20500px%3B%20padding%3A%205px%3B%20display%3A%20flex%3B%20flex-direction%3A%20column%3B%7D%23thumbboy-header%20%7Bdisplay%3A%20flexbox%3B%20justify-content%3A%20space-between%3B%20align-items%3A%20center%3B%20cursor%3A%20move%3B%20z-index%3A%2010000%3B%20background-color%3A%20%232196F3%3B%20color%3A%20%23fff%3B%20user-select%3A%20none%3B%20padding%3A%2010px%3B%7Dbutton%20%7Bmargin-top%3A%2010px%3B%20background%3A%20blue%3B%20color%3A%20%23fff%3B%20border%3A%20none%3B%20padding%3A%2010px%2020px%3B%20cursor%3A%20pointer%3B%20border-radius%3A%203px%3B%20font-size%3A%2014px%3B%7D%23thumbboy-grab%20%7Bbackground%3A%20%234CAF50%3B%7D%23thumbboy-grab%3Ahover%20%7Bbackground%3A%20%2345a049%3B%7D%23thumbboy-close%20%7Bbackground%3A%20%23f44336%3B%7D%23thumbboy-close%3Ahover%20%7Bbackground%3A%20%23da190b%3B%7D%23thumbboy-copy%20%7Bbackground%3A%20%23ff9800%3B%7D%23thumbboy-copy%3Ahover%20%7Bbackground%3A%20%23e68900%3B%7D%23thumbboy-debug%20%7Bcolor%3A%20%23333%3B%20background%3A%20white%3B%20border%3A%201px%20solid%20%23ccc%3B%20padding%3A%2010px%3B%20margin-top%3A%2010px%3B%20max-height%3A%20300px%3B%20overflow-y%3A%20auto%3B%20text-align%3A%20left%3B%20white-space%3A%20pre-wrap%3B%20font-family%3A%20monospace%3B%20font-size%3A%2012px%3B%7D.panel-content%20%7Bbackground-color%3A%20%23e8f4f8%3B%20padding%3A%2020px%3B%20margin%3A%2010px%200%3B%7D%23thumbboy-gallery%20%7Bdisplay%3A%20none%3B%20background%3A%20white%3B%20border%3A%201px%20solid%20%23ccc%3B%20padding%3A%2010px%3B%20margin%3A%2010px%200%3B%20max-height%3A%20400px%3B%20overflow-y%3A%20auto%3B%7D%23thumbboy-gallery.show%20%7Bdisplay%3A%20grid%3B%20grid-template-columns%3A%20repeat(3%2C1fr)%3B%20gap%3A%2010px%3B%20justify-items%3A%20center%3B%7D.gallery-item%20%7Bdisplay%3A%20flex%3B%20flex-direction%3A%20column%3B%20align-items%3A%20center%3B%20padding%3A%205px%3B%20border%3A%201px%20solid%20%23eee%3B%20border-radius%3A%205px%3B%20background%3A%20%23fafafa%3B%20justify-content%3A%20center%3B%20width%3A%20100%25%3B%20max-width%3A%20150px%3B%7D.gallery-item%20img%20%7Bmax-width%3A%20150px%3B%20max-height%3A%20150px%3B%20object-fit%3A%20contain%3B%20border%3A%201px%20solid%20%23ddd%3B%20border-radius%3A%203px%3B%20background%3A%20white%3B%20cursor%3A%20pointer%3B%20transition%3A%20transform%200.2s%3B%7D.gallery-item%20img%3Ahover%20%7Btransform%3A%20scale(1.05)%3B%20border-color%3A%20%234CAF50%3B%7D%60%3B%20document.head.appendChild(style)%3B%20var%20container%20%3D%20document.createElement('div')%3B%20container.innerHTML%20%3D%20%60%20%3Cdiv%20id%3D%22thumbboy-panel%22%20style%3D%22text-align%3A%20center%3B%20top%3A%2081px%3B%20left%3A%20165px%3B%22%3E%20%3Cdiv%20id%3D%22thumbboy-header%22%3E%20%3Cspan%3EThumbBoy%20v2.1%20-%20Drag%20to%20Move%3C%2Fspan%3E%20%3C%2Fdiv%3E%20%3Cdiv%20class%3D%22panel-content%22%3E%20%3Ch3%20style%3D%22margin-top%3A%200%3B%20color%3A%20%23333%3B%22%3EImage%20URL%20Grabber%3C%2Fh3%3E%20%3Cdiv%20id%3D%22thumbboy-gallery%22%3E%3C%2Fdiv%3E%20%3Cbutton%20id%3D%22thumbboy-grab%22%3EGrab%20Images%3C%2Fbutton%3E%20%3Cbutton%20id%3D%22thumbboy-copy%22%20style%3D%22display%3A%20none%3B%22%3ECopy%20JSON%3C%2Fbutton%3E%20%3Cbutton%20id%3D%22thumbboy-close%22%3EClose%3C%2Fbutton%3E%20%3C%2Fdiv%3E%20%3Cdiv%20id%3D%22thumbboy-debug%22%3EClick%20%22Grab%20Images%22%20to%20collect%20all%20image%20URLs%20from%20this%20page...%3C%2Fdiv%3E%20%3C%2Fdiv%3E%20%3C!--%20Just%20to%20allow%20scrolling%20for%20testing%20--%3E%20%3Cimg%20src%3D%22images%2Ftest1.jpg%22%20style%3D%22position%3A%20fixed%3B%20top%3A%2010px%3B%20right%3A%2010px%3B%20width%3A%2050px%3B%20height%3A%2050px%3B%20z-index%3A%2010000%3B%22%3E%20%3Cimg%20src%3D%22images%2Ftest2.jpg%22%20style%3D%22position%3A%20fixed%3B%20top%3A%2010px%3B%20right%3A%2050px%3B%20width%3A%2050px%3B%20height%3A%2050px%3B%20z-index%3A%2010000%3B%22%3E%20%60%3B%20document.body.appendChild(container)%3B%20(function%20()%20%7Bvar%20panel%20%3D%20document.getElementById('thumbboy-panel')%3B%20var%20header%20%3D%20document.getElementById('thumbboy-header')%3B%20function%20dragElement(el%2Cheader)%20%7Bvar%20x1%20%3D%200%2Cx2%20%3D%200%2Cy1%20%3D%200%2Cy2%20%3D%200%3B%20header.onmousedown%20%3D%20function%20(e)%20%7Be.preventDefault()%3B%20e.stopPropagation()%3B%20y1%20%3D%20e.clientX%3B%20y2%20%3D%20e.clientY%3B%20document.onmousemove%20%3D%20function%20(e)%20%7Be.preventDefault()%3B%20x1%20%3D%20y1%20-%20e.clientX%3B%20x2%20%3D%20y2%20-%20e.clientY%3B%20y1%20%3D%20e.clientX%3B%20y2%20%3D%20e.clientY%3B%20el.style.top%20%3D%20(el.offsetTop%20-%20x2)%20%2B%20'px'%3B%20el.style.left%20%3D%20(el.offsetLeft%20-%20x1)%20%2B%20'px'%3B%7D%3B%20document.onmouseup%20%3D%20function%20()%20%7Bdocument.onmousemove%20%3D%20null%3B%20document.onmouseup%20%3D%20null%3B%7D%3B%7D%3B%20el.onmousedown%20%3D%20function%20(e)%20%7Be.stopPropagation()%3B%7D%3B%7DdragElement(panel%2Cheader)%3B%20document.getElementById('thumbboy-grab').addEventListener('click'%2Cfunction%20()%20%7Bvar%20images%20%3D%20document.querySelectorAll('img')%3B%20var%20urls%20%3D%20%5B%5D%3B%20var%20count%20%3D%200%3B%20var%20gallery%20%3D%20document.getElementById('thumbboy-gallery')%3B%20var%20copyBtn%20%3D%20document.getElementById('thumbboy-copy')%3B%20gallery.innerHTML%20%3D%20''%3B%20gallery.className%20%3D%20''%3B%20copyBtn.style.display%20%3D%20'none'%3B%20if%20(images.length%20%3D%3D%3D%200)%20%7Bdocument.getElementById('thumbboy-debug').textContent%20%3D%20'No%20images%20found%20on%20this%20page.'%3B%20return%3B%7Dimages.forEach(function%20(img%2Cindex)%20%7Bif%20(img.src%20%26%26%20img.src.trim()%20!%3D%3D%20'')%20%7Bcount%2B%2B%3B%20urls.push(img.src)%3B%20var%20galleryItem%20%3D%20document.createElement('div')%3B%20galleryItem.className%20%3D%20'gallery-item'%3B%20var%20thumbnail%20%3D%20document.createElement('img')%3B%20thumbnail.src%20%3D%20img.src%3B%20thumbnail.style.maxWidth%20%3D%20'150px'%3B%20thumbnail.style.maxHeight%20%3D%20'150px'%3B%20thumbnail.style.objectFit%20%3D%20'contain'%3B%20thumbnail.style.cursor%20%3D%20'pointer'%3B%20thumbnail.title%20%3D%20'Click%20to%20open%20in%20new%20tab%3A%20'%20%2B%20img.src%3B%20thumbnail.addEventListener('click'%2Cfunction%20()%20%7Bwindow.open(img.src%2C'_blank')%3B%7D)%3B%20thumbnail.onerror%20%3D%20function%20()%20%7Bthis.style.display%20%3D%20'none'%3B%20var%20errorText%20%3D%20document.createElement('div')%3B%20errorText.textContent%20%3D%20'Failed%20to%20load%20image'%3B%20errorText.style.color%20%3D%20'%23999'%3B%20errorText.style.fontSize%20%3D%20'12px'%3B%20errorText.style.textAlign%20%3D%20'center'%3B%20galleryItem.appendChild(errorText)%3B%7D%3B%20galleryItem.appendChild(thumbnail)%3B%20gallery.appendChild(galleryItem)%3B%7D%7D)%3B%20var%20jsonOutput%20%3D%20%7B%22images%22%3A%20urls%2C%22metadata%22%3A%20%7B%22source%22%3A%20window.location.href%2C%22title%22%3A%20document.title%2C%22domain%22%3A%20window.location.hostname%2C%22timestamp%22%3A%20new%20Date().toISOString()%2C%22total%22%3A%20count%20%7D%7D%3B%20var%20summary%20%3D%20'Found%20'%20%2B%20count%20%2B%20'%20images.%20JSON%20data%3A%5Cn%5Cn'%20%2B%20JSON.stringify(jsonOutput%2Cnull%2C2)%3B%20if%20(count%20%3D%3D%3D%200)%20%7Bsummary%20%3D%20'Found%20'%20%2B%20images.length%20%2B%20'%20image%20elements%2Cbut%20none%20have%20valid%20src%20URLs.'%3B%7Delse%20%7Bgallery.className%20%3D%20'show'%3B%20copyBtn.style.display%20%3D%20'inline-block'%3B%20window.thumbboyJsonData%20%3D%20jsonOutput%3B%7Ddocument.getElementById('thumbboy-debug').textContent%20%3D%20summary%3B%7D)%3B%20document.getElementById('thumbboy-copy').addEventListener('click'%2Cfunction%20()%20%7Bif%20(window.thumbboyJsonData)%20%7Bvar%20jsonString%20%3D%20JSON.stringify(window.thumbboyJsonData%2Cnull%2C2)%3B%20if%20(navigator.clipboard%20%26%26%20navigator.clipboard.writeText)%20%7Bnavigator.clipboard.writeText(jsonString).then(function%20()%20%7Bdocument.getElementById('thumbboy-debug').textContent%20%3D%20'JSON%20copied%20to%20clipboard!%5Cn%5Cn'%20%2B%20jsonString%3B%7D).catch(function%20()%20%7BcopyToClipboardFallback(jsonString)%3B%7D)%3B%7Delse%20%7BcopyToClipboardFallback(jsonString)%3B%7D%7D%7D)%3B%20function%20copyToClipboardFallback(text)%20%7Bvar%20textArea%20%3D%20document.createElement('textarea')%3B%20textArea.value%20%3D%20text%3B%20textArea.style.position%20%3D%20'fixed'%3B%20textArea.style.left%20%3D%20'-999999px'%3B%20textArea.style.top%20%3D%20'-999999px'%3B%20document.body.appendChild(textArea)%3B%20textArea.focus()%3B%20textArea.select()%3B%20try%20%7Bdocument.execCommand('copy')%3B%20document.getElementById('thumbboy-debug').textContent%20%3D%20'JSON%20copied%20to%20clipboard!%5Cn%5Cn'%20%2B%20text%3B%7Dcatch%20(err)%20%7Bdocument.getElementById('thumbboy-debug').textContent%20%3D%20'Copy%20failed.%20Please%20manually%20copy%20the%20JSON%20below%3A%5Cn%5Cn'%20%2B%20text%3B%7Ddocument.body.removeChild(textArea)%3B%7Ddocument.getElementById('thumbboy-close').addEventListener('click'%2Cfunction%20()%20%7Bpanel.remove()%3B%7D)%3B%7D)()%3B%7D)()%3B"
+            
+            
+            
+            
+            
+            id="generatedBookmarklet">📌 ThumbBoy v2.1</a></p>
+        <p style="color: #666; font-style: italic;">⬆️ This bookmarklet is auto-generated from the clean code below</p>
+  
+  
+ 
+  
+  
+    </div>
+
+
+    </main>
+    <footer>
+        <p>&copy; 2023 Thumbboy. All rights reserved.</p>
+    </footer>
+</body>
+</html>

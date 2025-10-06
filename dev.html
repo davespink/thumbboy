@@ -3,7 +3,7 @@
 
 <head>
     <meta charset="UTF-8">
-    <title>ThumbBoy - Image URL Grabber v2.2</title>
+    <title>ThumbBoy - Image URL Grabber v2.3</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -159,7 +159,7 @@
 
     <div id="thumbboy-panel" style="text-align: center;">
         <div id="thumbboy-header">
-            <span>ThumbBoy v2.2 - Drag to Move</span>
+            <span>ThumbBoy v2.3 - Drag to Move</span>
         </div>
 
         <div class="panel-content">
@@ -243,49 +243,16 @@
 
                 function checkAllProcessed() {
                     if (processedCount === images.length) {
-                        var jsonOutput = {
-                            "images": urls,
-                            "metadata": {
-                                "source": window.location.href,
-                                "title": document.title,
-                                "domain": window.location.hostname,
-                                "timestamp": new Date().toISOString(),
-                                "total": count
-                            }
-                        };
-
-                        var summary = 'Found ' + count + ' qualifying images (min size: ' + minSize + 'px).\nTotal images processed: ' + images.length + '\n\nJSON data:\n\n' + JSON.stringify(jsonOutput, null, 2);
-
                         if (count === 0) {
-                            summary = 'Found ' + images.length + ' image elements, but none meet the size requirements (min: ' + minSize + 'px).';
+                            document.getElementById('thumbboy-debug').textContent = 'Found ' + images.length + ' image elements, but none meet the size requirements (min: ' + minSize + 'px).';
                         } else {
                             gallery.className = 'show';
                             copyBtn.style.display = 'inline-block';
                             clearBtn.style.display = 'inline-block';
-                            window.thumbboyJsonData = jsonOutput;
                         }
 
-// update clipboard  
-
-                
-                         document.getElementById('thumbboy-debug').textContent = summary;
-                        
-                        // Auto-copy JSON to clipboard when images are found
-                        if (count > 0) {
-                            var jsonString = JSON.stringify(jsonOutput, null, 2);
-                            
-                            if (navigator.clipboard && navigator.clipboard.writeText) {
-                                navigator.clipboard.writeText(jsonString).then(function () {
-                                    document.getElementById('thumbboy-debug').textContent = summary + '\n\n✅ JSON auto-copied to clipboard!';
-                                }).catch(function () {
-                                    // Fallback silently - don't disrupt user experience
-                                    console.log('Auto-copy failed, user can still use Copy JSON button');
-                                });
-                            } else {
-                                // Fallback for older browsers - don't auto-copy
-                                console.log('Auto-copy not supported, user can use Copy JSON button');
-                            }
-                        }
+                        // Use centralized function for JSON and clipboard update
+                        updateJsonAndClipboard(true);
                     }
                 }
 
@@ -365,7 +332,7 @@
                                         }
                                         
                                         // Update JSON data and display
-                                        updateJsonOutput();
+                                        updateJsonAndClipboard(false);
                                     }
                                 });
 
@@ -419,8 +386,8 @@
                 });
             });
 
-            // Function to update JSON output when images are removed
-            function updateJsonOutput() {
+            // Centralized function to update JSON and clipboard
+            function updateJsonAndClipboard(showInitialMessage) {
                 var jsonOutput = {
                     "images": urls,
                     "metadata": {
@@ -432,10 +399,20 @@
                     }
                 };
 
-                var summary = 'Found ' + count + ' selected images (min size: ' + (window.thumbboyMinSize || 0) + 'px).\n\nJSON data:\n\n' + JSON.stringify(jsonOutput, null, 2);
+                var summary;
+                if (showInitialMessage) {
+                    var minSize = window.thumbboyMinSize || 0;
+                    summary = 'Found ' + count + ' qualifying images (min size: ' + minSize + 'px).\nTotal images processed: ' + document.querySelectorAll('img').length + '\n\nJSON data:\n\n' + JSON.stringify(jsonOutput, null, 2);
+                } else {
+                    summary = 'Found ' + count + ' selected images (min size: ' + (window.thumbboyMinSize || 0) + 'px).\n\nJSON data:\n\n' + JSON.stringify(jsonOutput, null, 2);
+                }
 
                 if (count === 0) {
-                    summary = 'No images selected. All images have been removed.';
+                    if (showInitialMessage) {
+                        summary = 'Found ' + document.querySelectorAll('img').length + ' image elements, but none meet the size requirements (min: ' + (window.thumbboyMinSize || 0) + 'px).';
+                    } else {
+                        summary = 'No images selected. All images have been removed.';
+                    }
                     document.getElementById('thumbboy-copy').style.display = 'none';
                     document.getElementById('thumbboy-clear').style.display = 'none';
                     document.getElementById('thumbboy-gallery').className = '';
@@ -447,9 +424,6 @@
 
                 window.thumbboyJsonData = jsonOutput;
                 document.getElementById('thumbboy-debug').textContent = summary;
-           
-                // update clipboard  
-
 
                 // Auto-copy JSON to clipboard when images are present
                 if (count > 0) {
@@ -469,17 +443,14 @@
                 }
             }
 
-            // Copy button functionality
+            // Copy button functionality (manual copy)
             document.getElementById('thumbboy-copy').addEventListener('click', function () {
                 if (window.thumbboyJsonData) {
                     var jsonString = JSON.stringify(window.thumbboyJsonData, null, 2);
 
-// update clipboard  
-
-
                     if (navigator.clipboard && navigator.clipboard.writeText) {
                         navigator.clipboard.writeText(jsonString).then(function () {
-                            document.getElementById('thumbboy-debug').textContent = 'JSON copied to clipboard!\n\n' + jsonString;
+                            document.getElementById('thumbboy-debug').textContent = 'JSON manually copied to clipboard!\n\n' + jsonString;
                         }).catch(function () {
                             copyToClipboardFallback(jsonString);
                         });
