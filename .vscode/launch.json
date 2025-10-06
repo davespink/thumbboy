@@ -9,7 +9,7 @@
             "type": "chrome",
             "request": "launch",
             "name": "dev",
-            "url": "http://localhost/projects/thumbboy/thumbboy.html"
+            "url": "http://localhost/projects/thumbboy/dev.html"
         },
              {
             "type": "chrome",
