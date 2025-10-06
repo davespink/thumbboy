@@ -108,7 +108,7 @@
     <div class="code-section">
         <h2>Generated Bookmarklet</h2>
         <p><strong>Drag this to your bookmarks bar:</strong></p>
-        <p><a class="bookmarklet-btn" href="#" id="generatedBookmarklet">📌 ThumbBoy v2.1</a></p>
+        <p><a class="bookmarklet-btn" href="#" id="generatedBookmarklet">📌 ThumbBoy v2.2</a></p>
         <p style="color: #666; font-style: italic;">⬆️ This bookmarklet is auto-generated from the clean code below</p>
     </div>
     <div class="code-section">
@@ -138,9 +138,16 @@
                 // Clone the iframe document to work with
                 const docClone = iframeDoc.cloneNode(true);
                 
-                // Remove all elements with id="do_not_deploy" or class="do_not_deploy"
-                const doNotDeployElements = docClone.querySelectorAll('#do_not_deploy, .do_not_deploy, [id*="do_not_deploy"]');
-                doNotDeployElements.forEach(element => element.remove());
+                // Find each do_not_deploy div and remove all elements within it, then remove the div itself
+                const doNotDeployDivs = docClone.querySelectorAll('#do_not_deploy, .do_not_deploy, [id*="do_not_deploy"]');
+                doNotDeployDivs.forEach(div => {
+                    // Remove all child elements within the div
+                    while (div.firstChild) {
+                        div.removeChild(div.firstChild);
+                    }
+                    // Remove the div itself
+                    div.remove();
+                });
                 
                 // Extract CSS from <style> tags
                 const styleElements = docClone.querySelectorAll('style');
@@ -218,7 +225,7 @@
 
         // Wait for iframe to load, then auto-generate
         window.addEventListener('load', function() {
-            const iframe = document.querySelector('iframe[src="thumbboy.html"]');
+            const iframe = document.querySelector('iframe');
             if (iframe) {
                 iframe.addEventListener('load', function() {
                     // Small delay to ensure content is fully loaded
@@ -231,7 +238,7 @@
 
     <!-- Load the index.html file in an iframe -->
     <h2>Loading index.html:</h2>
-    <iframe src="http://localhost/projects/thumbboy/thumbboy.html" width="100%" height="300px"></iframe>
+    <iframe src="http://localhost/projects/thumbboy/dev.html" width="100%" height="300px"></iframe>
 
     <!-- You can also pass parameters like in your working project
 
