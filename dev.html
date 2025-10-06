@@ -70,6 +70,22 @@
             background: #e68900;
         }
 
+        #thumbboy-filter {
+            background: #9c27b0;
+        }
+
+        #thumbboy-filter:hover {
+            background: #7b1fa2;
+        }
+
+        #thumbboy-clear {
+            background: #795548;
+        }
+
+        #thumbboy-clear:hover {
+            background: #5d4037;
+        }
+
         #thumbboy-debug {
             color: #333;
             background: white;
@@ -150,7 +166,9 @@
             <h3 style="margin-top: 0; color: #333;">Image URL Grabber</h3>
             <div id="thumbboy-gallery"></div>
             <button id="thumbboy-grab">Grab Images</button>
+            <button id="thumbboy-filter">Set Min Size</button>
             <button id="thumbboy-copy" style="display: none;">Copy JSON</button>
+            <button id="thumbboy-clear" style="display: none;">Clear All</button>
             <button id="thumbboy-close">Close</button>
         </div>
 
@@ -164,6 +182,10 @@
             // Element references
             var panel = document.getElementById('thumbboy-panel');
             var header = document.getElementById('thumbboy-header');
+            
+            // Global variables for image data (accessible across functions)
+            var urls = [];
+            var count = 0;
 
             // Dragging functionality
             function dragElement(el, header) {
@@ -196,58 +218,189 @@
             // Grab button functionality
             document.getElementById('thumbboy-grab').addEventListener('click', function () {
                 var images = document.querySelectorAll('img');
-                var urls = [];
-                var count = 0;
+                var processedCount = 0;
                 var gallery = document.getElementById('thumbboy-gallery');
                 var copyBtn = document.getElementById('thumbboy-copy');
+                var clearBtn = document.getElementById('thumbboy-clear');
+                var minSize = window.thumbboyMinSize || 0;
+                
+                // Reset global variables
+                urls = [];
+                count = 0;
 
                 // Clear previous gallery
                 gallery.innerHTML = '';
                 gallery.className = '';
                 copyBtn.style.display = 'none';
+                clearBtn.style.display = 'none';
 
                 if (images.length === 0) {
                     document.getElementById('thumbboy-debug').textContent = 'No images found on this page.';
                     return;
                 }
 
-                images.forEach(function (img, index) {
-                    if (img.src && img.src.trim() !== '') {
-                        count++;
-                        urls.push(img.src);
+                document.getElementById('thumbboy-debug').textContent = 'Processing ' + images.length + ' images...\nMinimum size filter: ' + minSize + 'px';
 
-                        // Create gallery item
-                        var galleryItem = document.createElement('div');
-                        galleryItem.className = 'gallery-item';
-
-                        var thumbnail = document.createElement('img');
-                        thumbnail.src = img.src;
-                        thumbnail.style.maxWidth = '150px';
-                        thumbnail.style.maxHeight = '150px';
-                        thumbnail.style.objectFit = 'contain';
-                        thumbnail.style.cursor = 'pointer';
-                        thumbnail.title = 'Click to open in new tab: ' + img.src;
-
-                        // Add click handler to open in new tab
-                        thumbnail.addEventListener('click', function () {
-                            window.open(img.src, '_blank');
-                        });
-
-                        thumbnail.onerror = function () {
-                            this.style.display = 'none';
-                            var errorText = document.createElement('div');
-                            errorText.textContent = 'Failed to load image';
-                            errorText.style.color = '#999';
-                            errorText.style.fontSize = '12px';
-                            errorText.style.textAlign = 'center';
-                            galleryItem.appendChild(errorText);
+                function checkAllProcessed() {
+                    if (processedCount === images.length) {
+                        var jsonOutput = {
+                            "images": urls,
+                            "metadata": {
+                                "source": window.location.href,
+                                "title": document.title,
+                                "domain": window.location.hostname,
+                                "timestamp": new Date().toISOString(),
+                                "total": count
+                            }
                         };
 
-                        galleryItem.appendChild(thumbnail);
-                        gallery.appendChild(galleryItem);
+                        var summary = 'Found ' + count + ' qualifying images (min size: ' + minSize + 'px).\nTotal images processed: ' + images.length + '\n\nJSON data:\n\n' + JSON.stringify(jsonOutput, null, 2);
+
+                        if (count === 0) {
+                            summary = 'Found ' + images.length + ' image elements, but none meet the size requirements (min: ' + minSize + 'px).';
+                        } else {
+                            gallery.className = 'show';
+                            copyBtn.style.display = 'inline-block';
+                            clearBtn.style.display = 'inline-block';
+                            window.thumbboyJsonData = jsonOutput;
+                        }
+
+                        document.getElementById('thumbboy-debug').textContent = summary;
+                    }
+                }
+
+                images.forEach(function (img, index) {
+                    if (img.src && img.src.trim() !== '') {
+                        // Create a new image to check dimensions
+                        var testImg = new Image();
+                        var loadStartTime = Date.now();
+                        var imageUrl = img.src;
+                        
+                        // Set a timeout for slow loading images
+                        var loadTimeout = setTimeout(function() {
+                            processedCount++;
+                            console.log('Image load timeout: ' + imageUrl);
+                            checkAllProcessed();
+                        }, 5000); // 5 second timeout
+                        
+                        testImg.onload = function() {
+                            clearTimeout(loadTimeout);
+                            processedCount++;
+                            var loadTime = Date.now() - loadStartTime;
+                            
+                            // Check for suspicious dimensions (blocked images often report 1x1 or 0x0)
+                            var isBlocked = false;
+                            var blockReason = '';
+                            
+                            if (this.naturalWidth === 0 || this.naturalHeight === 0) {
+                                isBlocked = true;
+                                blockReason = 'Zero dimensions';
+                            } else if (this.naturalWidth === 1 && this.naturalHeight === 1) {
+                                isBlocked = true;
+                                blockReason = 'Tracking pixel (1x1)';
+                            } else if (this.naturalWidth < 3 && this.naturalHeight < 3) {
+                                isBlocked = true;
+                                blockReason = 'Suspicious small size';
+                            }
+                            
+                            // Check if image meets minimum size requirement and isn't blocked
+                            if (!isBlocked && this.naturalWidth >= minSize && this.naturalHeight >= minSize) {
+                                count++;
+                                urls.push(imageUrl);
+
+                                // Create gallery item
+                                var galleryItem = document.createElement('div');
+                                galleryItem.className = 'gallery-item';
+                                galleryItem.style.position = 'relative';
+
+                                var thumbnail = document.createElement('img');
+                                thumbnail.src = imageUrl;
+                                thumbnail.style.maxWidth = '150px';
+                                thumbnail.style.maxHeight = '150px';
+                                thumbnail.style.objectFit = 'contain';
+                                thumbnail.style.cursor = 'pointer';
+                                thumbnail.title = 'Left click: open in new tab | Right click: remove from selection\n' + imageUrl + ' (' + this.naturalWidth + 'x' + this.naturalHeight + ') - Loaded in ' + loadTime + 'ms';
+
+                                // Add click handler to open in new tab
+                                thumbnail.addEventListener('click', function (e) {
+                                    if (e.button === 0) { // Left click
+                                        window.open(imageUrl, '_blank');
+                                    }
+                                });
+
+                                // Add right-click context menu to remove image
+                                thumbnail.addEventListener('contextmenu', function (e) {
+                                    e.preventDefault(); // Prevent browser context menu
+                                    
+                                    // Confirm removal
+                                    if (confirm('Remove this image from selection?\n\n' + imageUrl)) {
+                                        // Remove from gallery
+                                        galleryItem.remove();
+                                        
+                                        // Remove from urls array
+                                        var index = urls.indexOf(imageUrl);
+                                        if (index > -1) {
+                                            urls.splice(index, 1);
+                                            count--;
+                                        }
+                                        
+                                        // Update JSON data and display
+                                        updateJsonOutput();
+                                    }
+                                });
+
+                                // Add visual feedback for right-click availability
+                                thumbnail.addEventListener('mouseenter', function() {
+                                    galleryItem.style.boxShadow = '0 2px 8px rgba(0,0,0,0.3)';
+                                });
+                                
+                                thumbnail.addEventListener('mouseleave', function() {
+                                    galleryItem.style.boxShadow = 'none';
+                                });
+
+                                thumbnail.onerror = function () {
+                                    this.style.display = 'none';
+                                    var errorText = document.createElement('div');
+                                    errorText.textContent = 'Failed to load thumbnail';
+                                    errorText.style.color = '#999';
+                                    errorText.style.fontSize = '12px';
+                                    errorText.style.textAlign = 'center';
+                                    galleryItem.appendChild(errorText);
+                                };
+
+                                galleryItem.appendChild(thumbnail);
+                                gallery.appendChild(galleryItem);
+                            } else if (isBlocked) {
+                                console.log('Blocked image detected: ' + imageUrl + ' - ' + blockReason + ' (' + this.naturalWidth + 'x' + this.naturalHeight + ')');
+                            }
+                            
+                            checkAllProcessed();
+                        };
+                        
+                        testImg.onerror = function(e) {
+                            clearTimeout(loadTimeout);
+                            processedCount++;
+                            console.log('Image load error: ' + imageUrl + ' - Network error or blocked by CORS/CSP');
+                            checkAllProcessed();
+                        };
+                        
+                        // Try to detect if image is blocked by attempting to set crossOrigin
+                        try {
+                            testImg.crossOrigin = 'anonymous';
+                        } catch (e) {
+                            console.log('CrossOrigin blocked for: ' + imageUrl);
+                        }
+                        
+                        testImg.src = imageUrl;
+                    } else {
+                        processedCount++;
+                        checkAllProcessed();
                     }
                 });
+            });
 
+            // Function to update JSON output when images are removed
+            function updateJsonOutput() {
                 var jsonOutput = {
                     "images": urls,
                     "metadata": {
@@ -259,18 +412,22 @@
                     }
                 };
 
-                var summary = 'Found ' + count + ' images. JSON data:\n\n' + JSON.stringify(jsonOutput, null, 2);
+                var summary = 'Found ' + count + ' selected images (min size: ' + (window.thumbboyMinSize || 0) + 'px).\n\nJSON data:\n\n' + JSON.stringify(jsonOutput, null, 2);
 
                 if (count === 0) {
-                    summary = 'Found ' + images.length + ' image elements, but none have valid src URLs.';
+                    summary = 'No images selected. All images have been removed.';
+                    document.getElementById('thumbboy-copy').style.display = 'none';
+                    document.getElementById('thumbboy-clear').style.display = 'none';
+                    document.getElementById('thumbboy-gallery').className = '';
                 } else {
-                    gallery.className = 'show';
-                    copyBtn.style.display = 'inline-block';
-                    window.thumbboyJsonData = jsonOutput;
+                    document.getElementById('thumbboy-copy').style.display = 'inline-block';
+                    document.getElementById('thumbboy-clear').style.display = 'inline-block';
+                    document.getElementById('thumbboy-gallery').className = 'show';
                 }
 
+                window.thumbboyJsonData = jsonOutput;
                 document.getElementById('thumbboy-debug').textContent = summary;
-            });
+            }
 
             // Copy button functionality
             document.getElementById('thumbboy-copy').addEventListener('click', function () {
@@ -308,6 +465,43 @@
 
                 document.body.removeChild(textArea);
             }
+
+            // Filter button functionality - Set minimum image size
+            document.getElementById('thumbboy-filter').addEventListener('click', function () {
+                var currentMinSize = window.thumbboyMinSize || 100;
+                var newMinSize = prompt('Enter minimum image size (width or height in pixels):', currentMinSize);
+                
+                if (newMinSize !== null && !isNaN(newMinSize) && parseInt(newMinSize) >= 0) {
+                    window.thumbboyMinSize = parseInt(newMinSize);
+                    document.getElementById('thumbboy-debug').textContent = 'Minimum image size set to: ' + window.thumbboyMinSize + 'px\nClick "Grab Images" to apply filter.';
+                } else if (newMinSize !== null) {
+                    alert('Please enter a valid number (0 or greater)');
+                }
+            });
+
+            // Clear All button functionality
+            document.getElementById('thumbboy-clear').addEventListener('click', function () {
+                if (confirm('Clear all selected images?')) {
+                    // Clear global variables
+                    urls = [];
+                    count = 0;
+                    
+                    // Clear gallery
+                    var gallery = document.getElementById('thumbboy-gallery');
+                    gallery.innerHTML = '';
+                    gallery.className = '';
+                    
+                    // Hide buttons
+                    document.getElementById('thumbboy-copy').style.display = 'none';
+                    document.getElementById('thumbboy-clear').style.display = 'none';
+                    
+                    // Update debug display
+                    document.getElementById('thumbboy-debug').textContent = 'All images cleared. Click "Grab Images" to start fresh.';
+                    
+                    // Clear stored JSON data
+                    window.thumbboyJsonData = null;
+                }
+            });
 
             // Close button functionality
             document.getElementById('thumbboy-close').addEventListener('click', function () {
