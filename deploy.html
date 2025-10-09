@@ -108,7 +108,7 @@
     <div class="code-section">
         <h2>Generated Bookmarklet</h2>
         <p><strong>Drag this to your bookmarks bar:</strong></p>
-        <p><a class="bookmarklet-btn" href="#" id="generatedBookmarklet">📌 ThumbBoy v2.3</a></p>
+        <p><a class="bookmarklet-btn" href="#" id="generatedBookmarklet">📌 ThumbBoy v2.4</a></p>
         <p style="color: #666; font-style: italic;">⬆️ This bookmarklet is auto-generated from the clean code below</p>
     </div>
     <div class="code-section">
@@ -121,7 +121,13 @@
 
     <script>
 
-        function generateBookmarklet() {
+        async function sha256Hex(str) {
+            const data = new TextEncoder().encode(str);
+            const digest = await crypto.subtle.digest('SHA-256', data);
+            return Array.from(new Uint8Array(digest)).map(b => b.toString(16).padStart(2, '0')).join('');
+        }
+
+        async function generateBookmarklet() {
             try {
                 // Get the iframe element
                 const iframe = document.querySelector('iframe');
@@ -215,6 +221,11 @@
                 // Update the UI
                 document.getElementById('minifiedCodeArea').value = bookmarkletCode;
                 document.getElementById('generatedBookmarklet').href = bookmarkletCode;
+
+                // Compute and display hash of the minified payload (not including 'javascript:' prefix)
+                const hashHex = await sha256Hex(minifiedCode);
+                const hashEl = document.getElementById('hashHex');
+                if (hashEl) hashEl.value = hashHex;
                 
                 // Show success message
                 alert('✅ Bookmarklet generated successfully from iframe content!');
@@ -257,6 +268,12 @@
 
     <h2>Minified Code:</h2>
     <textarea id="minifiedCodeArea"></textarea>
+
+    <h2>SHA-256 (of minified payload)</h2>
+    <input id="hashHex" style="width:100%" readonly placeholder="Hash will appear here after generation" />
+    <div style="margin:8px 0 24px;color:#555;font-size:0.95em">
+        This hash is over the exact minified payload injected by the bookmarklet (the part after <code>javascript:</code> and before URL encoding). Use <a href="verify.html">verify.html</a> to validate any bookmarklet code against a published hash.
+    </div>
 
 </body>
 

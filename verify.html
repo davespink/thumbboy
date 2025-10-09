@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Verify ThumbBoy Bookmarklet</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    body { font-family: Arial, sans-serif; max-width: 900px; margin: 0 auto; padding: 20px; background:#f5f7fb; }
+    .card { background:#fff; border-radius:8px; padding:20px; box-shadow:0 2px 10px rgba(0,0,0,.08); margin:16px 0; }
+    textarea, input { width:100%; box-sizing:border-box; padding:10px; border:1px solid #d0d7de; border-radius:6px; font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace; }
+    textarea { min-height: 120px; }
+    .row { display:flex; gap:12px; flex-wrap: wrap; }
+    .row > * { flex:1; }
+    button { background:#2da44e; color:#fff; border:none; padding:10px 16px; border-radius:6px; cursor:pointer; font-weight:600; }
+    button.secondary { background:#0969da; }
+    button:disabled { opacity:.6; cursor:not-allowed; }
+    .small { color:#555; font-size:.9em; }
+    .ok { color: #1a7f37; font-weight:700; }
+    .bad { color: #a40e26; font-weight:700; }
+    .muted { color:#666; }
+    .mono { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace; }
+    code { background:#eef2f7; padding:2px 4px; border-radius:4px; }
+  </style>
+</head>
+<body>
+  <h1>Verify ThumbBoy Bookmarklet</h1>
+  <div class="card">
+    <p class="small">Paste either:<br>- The full <code>javascript:</code> bookmarklet URL, or<br>- The raw minified payload (exact code injected by the bookmarklet).</p>
+    <textarea id="inputCode" placeholder="Paste bookmarklet or minified payload here..."></textarea>
+  </div>
+  <div class="card">
+    <p class="small">Expected SHA-256 hash (hex) of the minified payload. You can copy this from <a href="deploy.html">deploy.html</a> when you generate the bookmarklet.</p>
+    <input id="expectedHash" placeholder="e.g. 9f2c... (64 hex chars)" />
+  </div>
+  <div class="card">
+    <div class="row">
+      <button id="btnVerify">Verify</button>
+      <button id="btnBeautify" class="secondary">Beautify preview</button>
+    </div>
+    <div id="result" style="margin-top:10px" class="muted">Result will appear here.</div>
+  </div>
+  <div class="card">
+    <h3>What this verifies</h3>
+    <ul class="small">
+      <li>We compute SHA-256 over the exact minified payload (the part after <code>javascript:</code> and before URL encoding).</li>
+      <li>If your computed hash matches the published one, the code you have matches the known build output.</li>
+      <li>This does not prove the code is safe; it only proves it matches the published build.</li>
+    </ul>
+  </div>
+
+  <script>
+    function normalizeInput(raw) {
+      let s = (raw || '').trim();
+      if (!s) return '';
+      // If it's a javascript: URL, strip scheme and URL decode once
+      if (/^javascript:/i.test(s)) {
+        const enc = s.replace(/^javascript:/i, '');
+        try { s = decodeURIComponent(enc); }
+        catch { s = enc; }
+      }
+      return s.trim();
+    }
+
+    async function sha256Hex(str) {
+      const data = new TextEncoder().encode(str);
+      const digest = await crypto.subtle.digest('SHA-256', data);
+      return Array.from(new Uint8Array(digest)).map(b => b.toString(16).padStart(2, '0')).join('');
+    }
+
+    function beautify(js) {
+      // Very lightweight beautify: add newlines after braces/semicolons.
+      return js
+  .replace(/;/g, ';\n')
+  .replace(/{/g, '{\n')
+  .replace(/}/g, '\n}\n')
+  .replace(/\s+\n/g, '\n');
+    }
+
+    const inputEl = document.getElementById('inputCode');
+    const expectedEl = document.getElementById('expectedHash');
+    const resultEl = document.getElementById('result');
+
+    document.getElementById('btnVerify').addEventListener('click', async () => {
+      const payload = normalizeInput(inputEl.value);
+      const expected = (expectedEl.value || '').trim().toLowerCase();
+      if (!payload) { resultEl.textContent = 'Paste code to verify.'; return; }
+      if (!expected || !/^[0-9a-f]{64}$/.test(expected)) { resultEl.textContent = 'Enter a 64-char hex SHA-256 hash.'; return; }
+      try {
+        const hash = await sha256Hex(payload);
+        if (hash === expected) {
+          resultEl.innerHTML = '<span class="ok">✔ Match</span> — This code matches the published hash.';
+        } else {
+          resultEl.innerHTML = '<span class="bad">✘ Mismatch</span> — Computed ' + hash + ' (hex). The payload differs from the published build.';
+        }
+      } catch (e) {
+        resultEl.textContent = 'Error computing hash: ' + (e && e.message ? e.message : e);
+      }
+    });
+
+    document.getElementById('btnBeautify').addEventListener('click', () => {
+      const payload = normalizeInput(inputEl.value);
+      if (!payload) { resultEl.textContent = 'Paste code to beautify preview.'; return; }
+      const pretty = beautify(payload);
+      resultEl.innerHTML = '<div class="small">Preview (lightweight):</div><pre class="mono" style="white-space:pre-wrap">' + pretty.replace(/[&<>]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;'}[c])) + '</pre>';
+    });
+  </script>
+</body>
+</html>
