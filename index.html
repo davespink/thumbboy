@@ -1,423 +1,120 @@
-<html>
+<!DOCTYPE html>
+<html lang="en">
 
 <head>
     <meta charset="UTF-8">
-
-
-    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
-    <meta http-equiv="Pragma" content="no-cache" />
-    <meta http-equiv="Expires" content="0" />
-
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
 </head>
-
-<script src="lib/utils.js"></script>
-<script src="lib/drag.js"></script>
-<script src="lib/widget.js"></script>
-
 <style>
-    html,
-    body,
-    * {
-        margin: 0;
-        padding: 0;
-        background-color: lightskyblue;
+    body {
+        font-family: Arial, sans-serif;
+        margin: 20px;
     }
 
-    #controlpanel_content {
-        display: grid;
-        grid-template-columns: repeat(3, 100px);
-        gap: 4px;
-        padding: 1px;
-    }
-
-    .controlpanel {
-        position: absolute;
-        top: 50px;
-        left: 50px;
-        width: 370px;
-        height: 600px;
-        overflow: auto;
-        border: solid black 2px;
-        border-radius: 8px;
-        text-align: center;
-        padding: 10px;
-        background-color: bisque;
-    }
-
-    img {
-        max-width: 100px;
-        max-height: 100px;
-        margin: 1px 0;
+    iframe {
         border: 1px solid #ccc;
+        border-radius: 5px;
+        margin: 10px 0;
     }
 
-    /* Resizable image widgets */
-    .resizeable-div {
-        resize: both;
-        overflow: hidden; /* Changed from auto to hidden */
-        border: 2px solid #333;
+    .info {
+        background: #f5f5f5;
+        padding: 10px;
+        border-radius: 5px;
+        margin: 10px 0;
+    }
+
+    body {
+        font-family: Arial, sans-serif;
+        max-width: 900px;
+        margin: 0 auto;
+        padding: 20px;
+        background-color: #f5f5f5;
+    }
+
+    .container {
         background: white;
-        min-width: 50px;
-        min-height: 50px;
-        position: relative; /* Ensure proper positioning context */
+        padding: 30px;
+        border-radius: 8px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
     }
 
-    /* Images inside resizable widgets should fill completely */
-    .resizeable-div img {
-        width: 100% !important;
-        height: 100% !important;
-        display: block;
-        max-width: none !important; /* Override the global img max-width */
-        max-height: none !important; /* Override the global img max-height */
+    .bookmarklet-btn {
+        display: inline-block;
+        padding: 15px 30px;
+        background-color: #4CAF50;
+        color: white;
+        text-decoration: none;
+        border-radius: 8px;
+        cursor: move;
+        font-size: 18px;
+        font-weight: bold;
+        margin: 20px 0;
+        transition: background-color 0.3s;
     }
 
-    /* Image widgets in control panel */
-    #controlpanel_content img {
-        cursor: pointer;
-        transition: transform 0.2s;
+    .bookmarklet-btn:hover {
+        background-color: #45a049;
     }
 
-    #controlpanel_content img:hover {
-        transform: scale(1.05);
-    }
-
-    input[type="text"] {
-        width: 200px;
-        padding: 4px;
-        margin: 4px 0;
-        box-sizing: border-box;
-    }
-
-    /* Gallery CSS */
-    .gallery-cell {
-        border: 1px dashed #ccc;
-        background: #f9f9f9;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        position: relative;
-        min-height: 40px;
-        transition: background-color 0.2s;
-    }
-
-    .gallery-cell:hover {
-        background: #e9e9e9;
-    }
-
-    .gallery-cell.drag-over {
-        background: #d4edda;
-        border-color: #28a745;
-    }
-
-    .gallery-cell img {
-        max-width: 100%;
-        max-height: 100%;
-        object-fit: contain;
-    }
-
-    .gallery-cell.empty::after {
-        content: 'Drop here';
-        color: #999;
+    textarea {
+        width: 100%;
+        height: 200px;
+        font-family: monospace;
         font-size: 12px;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        padding: 10px;
+        margin: 10px 0;
+    }
+
+    .code-section {
+        background-color: #f9f9f9;
+        padding: 20px;
+        border-radius: 5px;
+        margin: 20px 0;
+    }
+
+    button {
+        background-color: #2196F3;
+        color: white;
+        border: none;
+        padding: 10px 20px;
+        border-radius: 4px;
+        cursor: pointer;
+        margin: 5px;
+    }
+
+    button:hover {
+        background-color: #1976D2;
+    }
+
+    h1 {
+        color: #333;
         text-align: center;
+    }
+
+    h2 {
+        color: #4CAF50;
     }
 </style>
 
 
 <body>
-    <div id="image_template" class="widget user image" style="position: absolute; left: 100px; top: 100px; 
-         z-index: 10001;padding:0px;display:none;resize:both" title="1"><img src=""></div>
-    <div id="image_drop_template" class="widget user image" style="position: absolute; left: 100px; top: 100px; 
-         z-index: 10001;padding:0px;display:none" title="1"></div>
+
+    <h1>Welcome to thumbboy</h1>
+     
+
+    <div class="code-section">
+        <h2>Generated Bookmarklet</h2>
+        <p><strong>Drag this to your bookmarks bar:</strong></p>
+        <p><a class="bookmarklet-btn" href="#" id="generatedBookmarklet">📌 ThumbBoy v2.3</a></p>
     
-    <!-- Gallery Template -->
-    <div id="gallery_template" class="widget user gallery" style="position: absolute; left: 100px; top: 100px; 
-         z-index: 10001; display:none; resize:both; min-width: 200px; min-height: 150px; border: 2px solid #666; background: white;" title="gallery">
-        <div class="gallery-header" style="background: #ddd; cursor: move; padding: 5px; font-weight: bold; text-align: center;">
-            Gallery - Drag to Move
-        </div>
-        <div class="gallery-grid" style="display: grid; height: calc(100% - 30px); gap: 2px; padding: 5px;">
-            <!-- Grid cells will be dynamically generated -->
-        </div>
     </div>
 
-    <div id="panel" class="controlpanel" style="text-align: center;padding:10px;">
-        <div id="header" style="background:lightgrey; cursor: move; padding:5px; font-weight:bold; ">
-            ThumbBoy v2.3 - Drag to Move
-        </div>
-        <h3 style="margin: 0 auto; ">
-            Images from Thumbboy Snagger
-        </h3><br>
-
-        <div>
-            <input type="radio" name="mode" id="fixed" value="fixed" checked>
-            <label for="fixed"> Fixed Aspect</label>
-            <input type="radio" name="mode" id="free" value="free">
-            <label for="free">Free resize</label><br><br>
-            <button onclick="doClear()">Clear</button>
-        </div>
-
-        <!-- Gallery Controls -->
-        <div style="margin: 10px 0; padding: 10px; border: 1px solid #ccc; border-radius: 5px; background: #f5f5f5;">
-            <strong>Create Gallery:</strong><br>
-            Rows: <input type="number" id="gallery_rows" value="2" min="1" max="10" style="width: 50px;">
-            Cols: <input type="number" id="gallery_cols" value="3" min="1" max="10" style="width: 50px;">
-            <button onclick="createGallery()">Add Gallery</button>
-        </div>
 
 
-        <br><br>
-        <!-- Paste Box for images as json object of urls -->
-        <div id="pasteThumbs" contenteditable="true" spellcheck="false" style="width:250px;height:100px;background:lightblue;border:
-      solid black 10px; margin:0 auto; padding:10px" onPaste="pasteThumbboy(event);">
-            <div id="paste_help" style="text-align:center;height:100%">
-                You can snag images from the thumbboy snagger and paste them here.
-
-            </div>
-        </div>
-
-
-        <div id='controlpanel_content'>
-        </div>
-
-        <script>
-            function gid(id) {
-                return document.getElementById(id);
-            }
-            function doClear() {
-                const container = gid('controlpanel_content');
-                container.innerHTML = '';
-            }
-
-
-            const useSrc = true;
-            //
-            // User clicked on an image
-            //  
-            async function createImageWidget(imgsrc, isFixed) {
-                let imgURL;
-
-                if (!useSrc) {
-                    // Bypass conversion for testing
-                    imgURL = imgsrc;
-
-                    // Check if imgsrc is already a base64 data URL
-                    if (imgsrc.startsWith('data:')) {
-                        // It's already a base64 data URL - use it directly
-                        imgURL = imgsrc;
-                    } else {
-                        // It's an HTTP URL - convert to base64 using your relay
-                        try {
-                            imgURL = await urlToBase64(imgsrc);
-                        } catch (error) {
-                            console.error('Failed to convert image to base64:', error);
-                            // Fallback to original URL
-                            imgURL = imgsrc;
-                        }
-                    }
-                } else {
-                    imgURL = imgsrc;
-                }
-
-                let w = document.getElementById("image_template");
-                let newWidget = widget.clone(w);
-                vid(newWidget);
-
-                newWidget.style.left = "100px";
-                newWidget.style.top = "100px";
-                newWidget.style.zIndex = 10001;
-                newWidget.classList.add('resizeable-div');
-
-                let img = newWidget.querySelector('img');
-                if (!img) {
-                    img = document.createElement('img');
-                    newWidget.appendChild(img);
-                }
-
-                img.src = imgURL; // Set to the processed image URL (base64 or fallback)
-                img.style.width = '100%';
-                img.style.height = '100%';
-
-                if (isFixed) {
-                    img.style.objectFit = 'contain'; // Keeps aspect ratio, fits inside container
-                } else {
-                    img.style.objectFit = 'fill'; // Fills container, may distort
-                }
-
-                // Set the widget size explicitly
-                newWidget.style.width = '200px';
-                newWidget.style.height = '200px';
-
-                newWidget.style.resize = "both";
-
-                dragElement(newWidget);
-
-            }
-
-
-            function pasteThumbboy(event) {
-                event.preventDefault();
-                const clipboardData = event.clipboardData || window.clipboardData;
-                const pastedText = clipboardData.getData('text/plain');
-                if (!pastedText) {
-                    alert('No text data found in clipboard');
-                    return;
-                }
-
-                try {
-                    // Parse the JSON data
-                    const data = JSON.parse(pastedText);
-                    // Validate the data structure
-
-
-                    if (!data.images || !Array.isArray(data.images)) {
-                        alert('Invalid data format - expected JSON with image_urls array');
-                        return;
-                    }
-
-                    // Clear existing images
-                    doClear();
-
-
-                    // Process the image URLs
-                    const container = gid('controlpanel_content');
-
-                    data.images.forEach((url, index) => {
-                        createImage(url, container);
-                    });
-
-                    alert(`Loaded ${data.images.length} images from ${data.metadata.source || 'unknown source'}`);
-
-                } catch (error) {
-                    alert('Error parsing JSON data: ' + error.message);
-                }
-            }
-
-            function createImage(url, container) {
-                const img = document.createElement('img');
-                img.src = url;
-                img.style.cursor = 'pointer';
-                img.title = 'Click to add to page';
-
-                // Set object-fit based on radio button selection
-                const isFixed = gid('fixed').checked;
-                img.style.objectFit = 'contain';
-                img.style.width = '100px';
-                img.style.height = '100px';
-
-                img.onclick = function () {
-                    createImageWidget(url, isFixed);
-                };
-                gid('controlpanel_content').appendChild(img);
-            }
-
-
-            function imageClicked(img) {
-                createImageWidget(img.src, gid('fixed').checked);
-            }
-
-
-            function dragPanel(el, header) {
-                var x1 = 0, x2 = 0, y1 = 0, y2 = 0;
-                header.onmousedown = function (e) {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    y1 = e.clientX;
-                    y2 = e.clientY;
-                    document.onmousemove = function (e) {
-                        e.preventDefault();
-                        x1 = y1 - e.clientX;
-                        x2 = y2 - e.clientY;
-                        y1 = e.clientX;
-                        y2 = e.clientY;
-                        el.style.top = (el.offsetTop - x2) + 'px';
-                        el.style.left = (el.offsetLeft - x1) + 'px';
-                    };
-                    document.onmouseup = function () {
-                        document.onmousemove = null;
-                        document.onmouseup = null;
-                    };
-                };
-                el.onmousedown = function (e) {
-                    e.stopPropagation();
-                };
-            }
-            dragPanel(gid('panel'), gid('header'));
-
-            // Gallery Functions
-            function createGallery() {
-                const rows = parseInt(gid('gallery_rows').value) || 2;
-                const cols = parseInt(gid('gallery_cols').value) || 3;
-                
-                const template = gid("gallery_template");
-                const newGallery = widget.clone(template);
-                vid(newGallery);
-
-                // Position the gallery
-                newGallery.style.left = "200px";
-                newGallery.style.top = "200px";
-                newGallery.style.width = (cols * 100 + 20) + "px";
-                newGallery.style.height = (rows * 80 + 50) + "px";
-                newGallery.style.zIndex = 10001;
-
-                // Set up the grid
-                const grid = newGallery.querySelector('.gallery-grid');
-                grid.style.gridTemplateColumns = `repeat(${cols}, 1fr)`;
-                grid.style.gridTemplateRows = `repeat(${rows}, 1fr)`;
-
-                // Create grid cells
-                grid.innerHTML = '';
-                for (let i = 0; i < rows * cols; i++) {
-                    const cell = document.createElement('div');
-                    cell.className = 'gallery-cell empty';
-                    cell.dataset.cellIndex = i;
-                    
-                    // Setup drop zone for each cell
-                    cell.addEventListener('dragover', function(e) {
-                        e.preventDefault();
-                        cell.classList.add('drag-over');
-                    });
-
-                    cell.addEventListener('dragleave', function(e) {
-                        cell.classList.remove('drag-over');
-                    });
-
-                    cell.addEventListener('drop', function(e) {
-                        e.preventDefault();
-                        cell.classList.remove('drag-over');
-                        
-                        // Get the dragged image source
-                        const draggedImg = document.querySelector('.dragging');
-                        if (draggedImg) {
-                            // Clear cell and add the image
-                            cell.innerHTML = '';
-                            cell.classList.remove('empty');
-                            
-                            const img = document.createElement('img');
-                            img.src = draggedImg.src;
-                            cell.appendChild(img);
-                        }
-                    });
-                    
-                    grid.appendChild(cell);
-                }
-
-                // Make gallery draggable by header
-                const header = newGallery.querySelector('.gallery-header');
-                header.id = newGallery.id + "header";
-                dragElement(newGallery);
-
-                return newGallery;
-            }
-           
-    
-
-
-
-
-        </script>
 
 </body>
 
